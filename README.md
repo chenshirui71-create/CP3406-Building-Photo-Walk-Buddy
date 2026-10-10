@@ -1,55 +1,126 @@
-# MobileTech Utility App
+# Weather & UV
 
-This is a basic Android app template for **Assessment 1: Utility App**.
-It provides the structure for a simple tabular UI using **Jetpack Compose** and **Material Design 3**.
+A focused daily-life utility for CP3406 Assessment 1. It helps users check the
+weather and plan time outdoors with temperature, today's maximum UV index and
+maximum precipitation probability for Singapore or Brisbane.
 
----
+Developed from the lecturer-provided MobileTech Utility App starter template.
 
-## Getting Started
+## Core features
 
-### How to Run
-1. Clone or download this repo  
-2. Open in Android Studio  
-3. Run on an emulator or physical device (API 26+ recommended)  
+- Weather screen: current temperature and conditions, city-local weather time,
+  today's forecast date, maximum UV and maximum rain probability.
+- Settings screen: select Singapore or Brisbane, switch Celsius/Fahrenheit,
+  and choose a UV highlight threshold from 3 to 11.
+- Settings persist with SharedPreferences. The selected tab and preferences
+  also use `rememberSaveable` during activity recreation.
+- Refresh, loading feedback, connection/error messages and retry.
+- Cream and apricot Material 3 cards with weather-dependent Canvas illustrations.
+  Light/dark palettes, scrolling, width limits and stacked layouts accommodate
+  smaller screens and increased text size.
 
----
+## Implementation
 
-## Composables
+| Part | Responsibility |
+| --- | --- |
+| `MainActivity.kt` | Hosts Compose and supplies dependencies at the app entry point. |
+| `WeatherApp.kt` | Bottom navigation, shared settings, ViewModel factory and city loading. |
+| `WeatherScreen.kt` | State-driven UI and reusable weather/forecast/advice cards. |
+| `SettingsScreen.kt` | City, unit and UV controls; state changes are sent to the app. |
+| `WeatherIllustration.kt` | Decorative sun, cloud, rain, fog, snow and storm drawings. |
+| `WeatherViewModel.kt` | Loading/success/error state and lifecycle-bound coroutine jobs. |
+| `WeatherData.kt` | Retrofit API, response models, repository and dependency container. |
+| `WeatherPresentation.kt` | Temperature formatting, UV threshold comparison and condition labels. |
+| `SettingsRepository.kt` | Reads and writes persistent preferences. |
+| `ui/theme/` | Material 3 colour schemes and typography. |
 
-### UtilityApp()
-- Contains the screen layout using a Scaffold
-- Toggles content between Utility and Settings
+The dependency flow is `WeatherApi -> OpenMeteoRepository -> WeatherViewModel -> UI`.
+`WeatherViewModel` requires a repository through its constructor. A
+`viewModelFactory` in `WeatherApp` supplies the repository given to the app by
+`MainActivity`. This is manual dependency injection; no Hilt framework is needed.
+The repository depends on the `WeatherApi` interface, so tests can inject a fake
+API without network access.
 
-### UtilityScreen()
-- Displays a simple counter (replace with your utility logic)  
-- Includes a button to increment the counter
+The ViewModel cancels an earlier request when the city changes. It checks that
+the coroutine is still active before publishing results, so cancelled requests
+cannot overwrite newer data. Its activity-scoped instance survives rotation.
+Views receive state and event callbacks rather than constructing network clients.
 
-### SettingsScreen()
-- Placeholder for user preferences or configuration  
-- Can be extended to modify main screen behavior (e.g., theme, units, limits)  
+## Weather data
 
----
+Data source: [Open-Meteo](https://open-meteo.com/), via
+`https://api.open-meteo.com/v1/forecast`.
 
-## Key Concepts Covered
+- `current`: `temperature_2m,weather_code`
+- `daily`: `uv_index_max,precipitation_probability_max`
+- `forecast_days`: `1`
+- `temperature_unit`: `celsius`
+- City-specific coordinates and time zones are used for each request.
 
-| Week | Concept                        | Used In                          |
-|------|--------------------------------|----------------------------------|
-| 1    | Kotlin + Android Studio         | MainActivity.kt |
-| 2    | Jetpack Compose Layouts         | UtilityApp(), UtilityScreen(), SettingsScreen()   |
-| 3    | Material Design 3               | MobileTechUtilityAppTheme, MaterialTheme.typography |
-| 4    | ViewModel | Not included in starter          |
-| 5    | Retrofit  | Not included in starter          |
+The API always returns Celsius; Fahrenheit is calculated locally. Optional UV
+or rain values remain `N/A` when absent or outside their valid range. Missing
+required weather fields produce an error rather than fabricated values.
 
----
+**UV is today's predicted maximum, not a live current reading.** The selected
+threshold changes highlighting only. It is not a background notification.
+Rain probability is the daily maximum supplied by the API, not a promise that
+rain will or will not occur. The UI includes a link crediting Open-Meteo.
 
-## Suggested Extensions
-- Replace counter with a real utility (e.g., hydration tracker, timer)  
-- Add a ViewModel for state management  
-- Use SharedPreferences or DataStore to persist settings  
-- Add a simple API call using Retrofit (e.g., fetch weather or quotes)  
+## Run
 
----
+1. Open the project root (containing `settings.gradle.kts`) in Android Studio.
+2. Use JDK 17 for Gradle and install Android SDK Platform 36.
+3. Sync Gradle. The project uses Gradle 8.13, AGP 8.13.2 and Kotlin 2.0.21.
+4. Run the `app` configuration on an emulator or device running API 26 or later.
+5. An internet connection is needed to retrieve forecasts. No API key is required.
 
-## 📚 License
-This template is provided for educational use in CP3406.  
-Feel free to modify and extend it for your assessment.
+Use the configured local SDK path in `local.properties`; this machine-specific
+file is excluded from Git. Keep the existing Gradle/JDK configuration that
+already works on the development computer.
+
+## Validation
+
+The refactored app builds and runs successfully on the Android emulator.
+Local JVM tests passed using .\gradlew.bat testDebugUnitTest.
+Manual checks passed for city switching, temperature units, UV thresholds,
+saved settings, network error handling and recovery, and screen rotation.
+
+Run local JVM tests from the project terminal on Windows:
+
+```powershell
+.\gradlew.bat testDebugUnitTest
+```
+
+`WeatherLogicTest` checks temperature conversion and the exact UV alert boundary.
+`WeatherRepositoryTest` checks city coordinates/time zones, unavailable optional
+values, invalid optional values and missing required current-weather data.
+Both test classes completed successfully.
+
+Manual checks for the refactored version:
+
+- Load both cities and confirm the city-local timestamps and forecast dates.
+- Change units and UV threshold; confirm the main screen updates.
+- Close/reopen the app and verify settings remain saved.
+- Disconnect Wi-Fi and mobile data, refresh, reconnect, and retry successfully.
+- Rotate the device and try a larger system font; check scrolling and controls.
+- Check light and dark themes and open the data-source link.
+
+## Limitations
+
+The app supports two preset cities. It does not use GPS, deliver background
+alerts, or save weather forecasts for offline use. A failed refresh displays
+an error and retry action. Forecast values can change with each API update.
+
+## Sources and AI acknowledgement
+
+- Lecturer-provided CP3406 starter template (original project structure, theme
+  setup, Gradle configuration and navigation concept).
+- [Open-Meteo API documentation](https://open-meteo.com/en/docs).
+- [Android: ViewModels with dependencies](https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-factories).
+- [Android: Compose layout basics](https://developer.android.com/develop/ui/compose/layouts/basics).
+- [Android: SharedPreferences](https://developer.android.com/training/data-storage/shared-preferences).
+
+ChatGPT assisted with Android Studio/emulator troubleshooting, Kotlin and Compose
+explanations, code drafting and refactoring, weather API integration, UI styling,
+test drafting and README preparation. A separate Declaration of AI-Generated
+Material must accurately record this assistance when submitting the assignment.
