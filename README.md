@@ -120,7 +120,4 @@ an error and retry action. Forecast values can change with each API update.
 - [Android: Compose layout basics](https://developer.android.com/develop/ui/compose/layouts/basics).
 - [Android: SharedPreferences](https://developer.android.com/training/data-storage/shared-preferences).
 
-ChatGPT assisted with Android Studio/emulator troubleshooting, Kotlin and Compose
-explanations, code drafting and refactoring, weather API integration, UI styling,
-test drafting and README preparation. A separate Declaration of AI-Generated
-Material must accurately record this assistance when submitting the assignment.
+I used ChatGPT to support my learning of Kotlin and Compose. It helped with explanations of errors, libraries and concepts; code drafts and refactoring suggestions; weather API integration (network requests, JSON parsing and API key configuration); small UI adjustments such as alignment, spacing and colours; test ideas and example test code; Android Studio, Gradle and emulator troubleshooting; and README wording and formatting. I applied, ran and checked the suggestions in my own project, and I did the manual checking and testing myself. The overall UI design and implementation were my own work. Some suggestions were used before I fully understood them. I can explain the general purpose of Retrofit and dependency injection, but I still need references to set up Retrofit or replace a dependency on my own. A separate Declaration of AI-Generated Material must accurately record this assistance when submitting the assignment.
