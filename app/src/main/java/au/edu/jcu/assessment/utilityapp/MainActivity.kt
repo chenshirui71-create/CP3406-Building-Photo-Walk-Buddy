@@ -14,9 +14,10 @@ class MainActivity : ComponentActivity() {
         // Dependencies are supplied at the app entry point, not created by screens.
         val settingsRepository = SettingsRepository(applicationContext)
         val weatherRepository = WeatherContainer.repository
+        val photoWalkRepository = PhotoWalkRepository(applicationContext)
         setContent {
             MobileTech_UtilityAppTheme {
-                WeatherApp(settingsRepository, weatherRepository)
+                WeatherApp(settingsRepository, weatherRepository, photoWalkRepository)
             }
         }
     }

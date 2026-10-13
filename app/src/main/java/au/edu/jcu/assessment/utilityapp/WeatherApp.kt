@@ -30,7 +30,8 @@ import kotlin.math.roundToInt
 @Composable
 fun WeatherApp(
     settingsRepository: SettingsRepository,
-    weatherRepository: WeatherRepository
+    weatherRepository: WeatherRepository,
+    photoWalkRepository: PhotoWalkRepository
 ) {
     var selectedTab by rememberSaveable { mutableStateOf("Weather") }
     var city by rememberSaveable { mutableStateOf(settingsRepository.getCity()) }
@@ -40,6 +41,8 @@ fun WeatherApp(
     var uvThreshold by rememberSaveable {
         mutableStateOf(settingsRepository.getUvThreshold())
     }
+    var gear by remember { mutableStateOf(photoWalkRepository.getGear()) }
+    var photoTheme by remember { mutableStateOf(photoWalkRepository.getTheme()) }
 
     // Constructor injection keeps the ViewModel independent of the real API.
     val factory = remember(weatherRepository) {
@@ -48,6 +51,18 @@ fun WeatherApp(
     val weatherViewModel: WeatherViewModel = viewModel(factory = factory)
     LaunchedEffect(city) { weatherViewModel.load(city) }
 
+    val forecastDate = weatherViewModel.uiState.weather
+        ?.takeIf { it.city == city }?.forecastDate
+    val contextKey = forecastDate?.let { packingContext(city, it, gear) }
+    // Persistent storage is the source when the city, day or gear changes.
+    var packedIds by remember(contextKey) {
+        mutableStateOf(contextKey?.let(photoWalkRepository::getPackedIds) ?: emptySet())
+    }
+    val taskKey = forecastDate?.let { photoTaskContext(city, it, gear, photoTheme) }
+    var completedTasks by remember(taskKey) {
+        mutableStateOf(taskKey?.let(photoWalkRepository::getCompletedTasks) ?: emptySet())
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -55,7 +70,7 @@ fun WeatherApp(
                     selected = selectedTab == "Weather",
                     onClick = { selectedTab = "Weather" },
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                    label = { Text("Weather") }
+                    label = { Text("Photo walk") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "Settings",
@@ -79,6 +94,42 @@ fun WeatherApp(
                     fahrenheit = fahrenheit,
                     uvThreshold = uvThreshold,
                     onRefresh = { weatherViewModel.load(city, force = true) },
+                    gear = gear,
+                    packedIds = packedIds,
+                    photoTheme = photoTheme,
+                    completedTasks = completedTasks,
+                    onThemeChange = {
+                        photoTheme = it
+                        photoWalkRepository.saveTheme(it)
+                    },
+                    onTaskChange = { id, checked ->
+                        taskKey?.let { key ->
+                            completedTasks = if (checked) completedTasks + id else completedTasks - id
+                            photoWalkRepository.saveCompletedTasks(key, completedTasks)
+                        }
+                    },
+                    onResetTasks = {
+                        taskKey?.let { key ->
+                            completedTasks = emptySet()
+                            photoWalkRepository.saveCompletedTasks(key, completedTasks)
+                        }
+                    },
+                    onGearChange = {
+                        gear = it
+                        photoWalkRepository.saveGear(it)
+                    },
+                    onPackedChange = { id, checked ->
+                        contextKey?.let { key ->
+                            packedIds = if (checked) packedIds + id else packedIds - id
+                            photoWalkRepository.savePackedIds(key, packedIds)
+                        }
+                    },
+                    onResetPacking = {
+                        contextKey?.let { key ->
+                            packedIds = emptySet()
+                            photoWalkRepository.savePackedIds(key, packedIds)
+                        }
+                    },
                     modifier = screenModifier
                 )
             } else {
