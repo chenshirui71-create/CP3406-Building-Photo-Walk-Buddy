@@ -110,7 +110,7 @@ manual checks on the user's Android emulator.
 Run local JVM tests from the project terminal on Windows:
 
 ```powershell
-.\gradlew.bat testDebugUnitTest
+.\gradlew.bat testDebugUnitTest assembleDebug
 ```
 
 `WeatherLogicTest` checks temperature conversion and the exact UV alert boundary.
