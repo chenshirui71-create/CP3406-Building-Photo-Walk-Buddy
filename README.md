@@ -101,14 +101,11 @@ already works on the development computer.
 
 ## Validation
 
-The compact task-layout version has not yet been built on the user's Windows
-computer. Static checks cover XML, patch scope and state/persistence wiring.
-Android build and all tests must be run before claiming the enhanced version passes.
-
-The previous Weather & UV version built and ran successfully on the user's
-Android emulator, and its local tests and manual checks passed.
-The new Photo Walk Buddy changes still require a Windows build and repeat
-manual checks. No successful Android build is claimed for these changes yet.
+The final compact layout launches on the user's Android emulator. The full
+command below was run on the configured Windows development computer, and the
+unit tests and debug build completed successfully (`BUILD SUCCESSFUL`).
+The earlier Weather & UV version also built, ran and passed its local tests and
+manual checks on the user's Android emulator.
 
 Run local JVM tests from the project terminal on Windows:
 
@@ -169,7 +166,15 @@ an error and retry action. Forecast values can change with each API update.
 - [Android: Compose layout basics](https://developer.android.com/develop/ui/compose/layouts/basics).
 - [Android: SharedPreferences](https://developer.android.com/training/data-storage/shared-preferences).
 
-ChatGPT assisted with Android Studio/emulator troubleshooting, Kotlin and Compose
-explanations, code drafting and refactoring, weather API integration, UI styling,
-test drafting, photography checklist development and README preparation. A separate Declaration of AI-Generated
-Material must accurately record this assistance when submitting the assignment.
+I used ChatGPT to support my learning of Kotlin and Compose. It helped with
+explanations of errors, libraries and concepts; code drafts and refactoring
+suggestions; weather API integration (network requests, JSON parsing and API key
+configuration); small UI adjustments such as alignment, spacing and colours; test
+ideas and example test code; photography checklist development; Android Studio,
+Gradle and emulator troubleshooting; and README wording and formatting. I applied,
+ran and checked the suggestions in my own project, and I did the manual checking
+and testing myself. Some suggestions were used before I fully understood them. I
+can explain the general purpose of Retrofit and dependency injection, but I still
+need references to set up Retrofit or replace a dependency on my own. A separate
+Declaration of AI-Generated Material must accurately record this assistance when
+submitting the assignment.
