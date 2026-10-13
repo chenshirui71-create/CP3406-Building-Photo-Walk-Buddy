@@ -121,7 +121,7 @@ The previous two test classes passed before the photography changes.
 data, progress counts, separate list identities and stored gear fallback.
 `PhotoWalkInspirationTest` adds six tests for rain thresholds, current rain,
 thunderstorm indoor advice, missing data, task identity/counts and stored themes.
-The new tests must be run on the configured development computer.
+All four test classes passed on the configured Windows development computer.
 
 Manual checks for Photo Walk Buddy:
 
